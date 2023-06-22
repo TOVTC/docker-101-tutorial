@@ -1,4 +1,5 @@
 # Getting Started With Docker
+*   run in Powershell, not Bash
 ```
 docker run -d -p 80:80 docker/getting-started
 ```
@@ -50,7 +51,7 @@ docker push <username>/<app-name>:tagname
 docker run -dp 3000:3000 <username>/<app-name>
 ```
 
-## Data Persistence
+## Data Persistence (Named Volumes)
 *   a running container uses various layers froman image for its filesystem and has its own "scratch space" to create/update/remove files
 ```
 docker run -d ubuntu bash -c "shuf -i 1-10000 -n 1 -o /data.txt && tail -f /dev/null"
@@ -91,3 +92,37 @@ docker volume inspect <volume-name>
 ```
 *   provides additional information about the volume, including where data is being stored
     *   the Mountpoint is the actual location on the disk where the data is stored
+
+## Data Persistence (Bind Mounts)
+*   bind mounts allow for control over the exact mountpoint on the host and can be used to persist data but is often used to provide additional data into containers
+*   bind mounts can be used to mount soruce code into the container to monitor whether the code changes, respond to change, and see immediate changes
+*   to start a container to support a dev workflow:
+    *   mount source doe into the container
+    *   install all dependencies, including dev dependences
+    *   start nodemon to watch filesystem changes (example app is JS and Node)
+```
+docker run -dp 3000:3000 `
+    -w /app -v "$(pwd):/app" `
+    node:18-alpine `
+    sh -c "yarn install && yarn run dev"
+```
+*   -dp 3000:3000 - runs the app in detached mode mapping port 3000 to 3000
+*   -w /app - sets the container's working directory where the command will run from
+*   -v "$(pwd):/app" - bind mount (link) to the host's present getting-started/app directory to the container's /app directory
+    *   Docker needs absolute paths so use pwd to find the absolute path of the working directory
+*   node:18-alpine - specifies image to use (base image for our app from Docekrfile)
+*   sh - c "yarn install && yarn run dev" - command to start a shell (alpine doesn't have bash) and running yarn install to install all dependencies and start running dev
+    *   in package.json, the dev script starts nodemon
+```
+docker logs -f <container-id>
+```
+*   allows you to watch logs
+*   now the app does not need to be rebuilt between edits and changes will be reflected upon reload
+*   stop the container then run a new build
+```
+docker build -t <app-name>
+```
+*   bind mounts are very common for local development setups using the docker run command will pull and install all build tools and environments required for app development
+```
+docker run
+```
