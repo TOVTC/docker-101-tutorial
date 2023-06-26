@@ -126,3 +126,52 @@ docker build -t <app-name>
 ```
 docker run
 ```
+
+## Multi-Container Apps
+*   each container should be responsible for one thing only (e.g. API's and front end scale differently, allows for isolated version updates, etc.)
+*   if two containers are on the same network, they can talk to each other - if they aren't, they can't
+*   there are two ways to put a container on a network: assign it at start or connect an existing container (here, create the network and then attach the container at startup)
+```
+docker network create <network-name>
+```
+*   creates the network the network
+```
+docker run -d `
+    --network <network-name> --network-alias mysql `
+    -v <volume-name>:/var/lib/mysql `
+    -e MYSQL_ROOT_PASSWORD=secret `
+    -e MYSQL_DATABASE=todos `
+    mysql:8.0
+```
+*   the volume is mounted to the /var/lib/mysql directory, which is where MySQL stores its data - Docker recognizes that we want to use a named volume, so it creates one automatically without the "docker volume create" command needing to be run
+*   the --network-alias flag is useful for finding the IP address of the mysql server container in a later step
+```
+docker exec -it <mysql-container-id> mysql -p
+```
+*   will connect to the database to verify that it is up and running (opens MySQL shell) - use the password in the environment variables defined when the container was created
+```
+docker run -it --network <app-name> nicolaka/netshoot
+```
+*   nicolaka/netshoot is a container that ships with a lot of tools for troubleshooting and debugging network issues
+```
+dig mysql
+```
+*   the "dig" command is a DNS tool that looks up the IP address for the hostname mysql - it uses the --network-alias flag to find the address (i.e. the app only needs to connect to a host named "mysql" and it will connect to the database)
+*   "exit" will exit the netshoot container
+*   MySQL requires the following variables
+    *   MYSQL_HOST - the hostname for the running MySQL server
+    *   MYSQL_USER - the username to use for the connection
+    *   MYSQL_PASSWORD - the password to use for the connection
+    *   MYSQL_DB - the database to use once connected
+*   specifying connection settings using environment variables is discouraged for applications in production but acceptable for development
+```
+docker run -dp 3000:3000 `
+  -w /app -v "$(pwd):/app" `
+  --network todo-app `
+  -e MYSQL_HOST=mysql `
+  -e MYSQL_USER=root `
+  -e MYSQL_PASSWORD=secret `
+  -e MYSQL_DB=<database-name> `
+  node:18-alpine `
+  sh -c "yarn install && yarn run dev"
+```
