@@ -20,11 +20,11 @@
   * Yaml
 
   ## Usage Information<a name="usage"></a>
-  This is a practice application.
+  This is a practice application.</br>
   </br>![Docker To Do List](./to-do.png "Docker To Do List")</br>
   
   ## Authors & Acknowledgements<a name="credits"></a>
-  This is a practice application found on Docker's main website.</br>
+  Starter code provided by Docker.</br>
   Made by [TOVTC](https://github.com/TOVTC).
   
   ## Questions?<a name="questions"></a>
