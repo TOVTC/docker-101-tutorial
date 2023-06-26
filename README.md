@@ -188,7 +188,7 @@ docker compose up -d
 ```
 docker compose logs -f
 ```
-*   displays the logs from each searvice
+*   displays the logs from each service
 ```
 docker compose logs -f app
 ```
@@ -200,3 +200,24 @@ docker compose down
 ```
 *   stops the application and removes the network
 *   by default, named volumes in the compose file are not removed when running docker compose down - add the "--volumes" flag to remove them
+
+## Image Building Best Practices
+```
+docker scan <app-name>
+```
+*   scans the application for security vulnerabilities
+*   Docker Hub can also be configured to automatically scan all newly pushed images automatically
+```
+docker image history <app-name>
+```
+*   displays how an image is composed (shows commands that were used to create aech layer within an image) from most to least recent
+```
+docker image history --no-trunc <app-name>
+```
+*   adding the "--no-trunc" flag provides the full output
+*   when a layer is changed, all downstream layers have to be recreated - each command in a Dockerfile becomes a new layer in the image
+*   to avoid yarn having to re-install all dependencies, structure the Dockerfile so that it supports caching of dependencies
+    *   in Node, dependencies are defined in package.json, so copy only package.json first, install all dependencies, then copy everything else in
+    *   that way, yarn dependences are only recreated if tehre are changes to package.json
+*   a .dockerignore file should also be added to the root directory so node modules are not copied over, overwriting the files created in the RUN command
+*   multi-stage builds might be needed for your application (e.g. nginx is a multi-stage container for apps such as React)
