@@ -175,3 +175,28 @@ docker run -dp 3000:3000 `
   node:18-alpine `
   sh -c "yarn install && yarn run dev"
 ```
+
+## Docker Compose
+*   docker compose defines and allows sharing of multi-container applications
+*   a YAML file defines services and can spin up or tear down the entire application with one command - its biggest advantage is the ability to define an application stack in one file and allow for easy development environments
+*   create a file called "docker-compose.yml" in the root directory
+```
+docker compose up -d
+```
+*   spins up the app (in detached mode) using the docker compose file
+*   a volume and a network are created (the volume is defined in docker compose, but the network is created by default)
+```
+docker compose logs -f
+```
+*   displays the logs from each searvice
+```
+docker compose logs -f app
+```
+*   add an argument to follow and view logs of a specific service
+*   when the app starts up, it waits for MySQL to be up and ready before trying to connect - Docker doesn't have built in support to wait for another container to be up, but Node based projects can use the wait-port dependency
+*   after starting up the project, Docker desktop groups containers together under the project name (the directory the docker-compose.yml file is located in)
+```
+docker compose down
+```
+*   stops the application and removes the network
+*   by default, named volumes in the compose file are not removed when running docker compose down - add the "--volumes" flag to remove them

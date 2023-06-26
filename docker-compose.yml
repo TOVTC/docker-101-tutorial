@@ -1,0 +1,35 @@
+# start by defining a list of services or containers that should be run as part of the application
+services:
+# first, define the service entry and image for the container
+# the name automatically becomes a network alias
+  app:
+    image: node:18-alpine
+    command: sh -c "yarn install && yarn run dev"
+    ports:
+    # this uses "short syntax" formatting as opposed to "long sytax"
+      - 3000:3000
+    # we can use relative paths from the current directory for Docker Compose volume definitions
+    # map the working directory to the app directory
+    working_dir: /app
+    volumes:
+      - ./:/app
+    # set environment variables
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
+      MYSQL_DB: todos
+  # define the MySQL service
+  # it is named mysql and automatically gets the network alias
+  mysql:
+    image: mysql:8.0
+    # define the volume mapping and specify the mountpoint in the service config
+    volumes:
+      - todo-mysql-data:/var/lib/mysql
+    # environment variables
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: todos
+# by only providing the volume name, the default options are used  
+volumes:
+  todo-mysql-data:
